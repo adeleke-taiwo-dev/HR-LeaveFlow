@@ -13,7 +13,7 @@ A production-ready, full-stack HR leave management application built from the gr
 
 | | URL |
 |--|-----|
-| **Frontend** | [https://client-zeta-green.vercel.app](https://client-zeta-green.vercel.app) |
+| **Frontend** | [https://adeleke-taiwo-dev.github.io/HR-LeaveFlow/](https://adeleke-taiwo-dev.github.io/HR-LeaveFlow/) |
 | **Backend API** | [https://hr-leaveflow.onrender.com/api/v1](https://hr-leaveflow.onrender.com/api/v1) |
 
 > **Note:** The backend runs on Render's free tier and may take ~30 seconds to wake up on first request.
@@ -166,8 +166,8 @@ Base URL: `/api/v1`
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/adeleke-taiwo-dev/Leave-Management-Application.git
-   cd Leave-Management-Application
+   git clone https://github.com/adeleke-taiwo-dev/HR-LeaveFlow.git
+   cd HR-LeaveFlow
    ```
 
 2. **Set up the backend**
