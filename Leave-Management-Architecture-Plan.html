@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HR LeaveFlow — Full-Stack Architecture Plan</title>
+    <style>
+        @media print {
+            body { font-size: 11pt; }
+            .page-break { page-break-before: always; }
+            h1 { font-size: 22pt; }
+            h2 { font-size: 16pt; }
+            h3 { font-size: 13pt; }
+            table { font-size: 10pt; }
+            pre { font-size: 9pt; }
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #1f2937;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: #fff;
+        }
+
+        .cover {
+            text-align: center;
+            padding: 4rem 2rem;
+            border-bottom: 3px solid #3b82f6;
+            margin-bottom: 2rem;
+        }
+
+        .cover h1 {
+            font-size: 2.2rem;
+            color: #1e40af;
+            margin-bottom: 0.5rem;
+        }
+
+        .cover .subtitle {
+            font-size: 1.2rem;
+            color: #6b7280;
+            margin-bottom: 2rem;
+        }
+
+        .cover .meta {
+            font-size: 0.9rem;
+            color: #9ca3af;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            color: #1e40af;
+            border-bottom: 2px solid #dbeafe;
+            padding-bottom: 0.5rem;
+            margin: 2rem 0 1rem;
+        }
+
+        h3 {
+            font-size: 1.15rem;
+            color: #374151;
+            margin: 1.5rem 0 0.75rem;
+        }
+
+        p, li {
+            margin-bottom: 0.5rem;
+            color: #374151;
+        }
+
+        ul, ol {
+            padding-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+
+        th, td {
+            border: 1px solid #e5e7eb;
+            padding: 0.5rem 0.75rem;
+            text-align: left;
+        }
+
+        th {
+            background: #f0f4ff;
+            font-weight: 600;
+            color: #1e40af;
+        }
+
+        tr:nth-child(even) { background: #f9fafb; }
+
+        pre {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 1rem;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            margin: 1rem 0;
+        }
+
+        code {
+            background: #f1f5f9;
+            padding: 0.15rem 0.4rem;
+            border-radius: 3px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 0.85em;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.15rem 0.5rem;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-blue { background: #dbeafe; color: #1e40af; }
+        .badge-green { background: #d1fae5; color: #065f46; }
+        .badge-orange { background: #fef3c7; color: #92400e; }
+
+        .info-box {
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 1rem 1.25rem;
+            border-radius: 0 6px 6px 0;
+            margin: 1rem 0;
+        }
+
+        .info-box p { margin: 0; color: #1e40af; }
+
+        .section-number {
+            display: inline-block;
+            background: #3b82f6;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 28px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-right: 0.5rem;
+        }
+
+        .footer {
+            margin-top: 3rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e5e7eb;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #9ca3af;
+        }
+    </style>
+</head>
+<body>
+
+<div class="cover">
+    <h1>HR LeaveFlow</h1>
+    <p class="subtitle">Full-Stack Architecture Plan</p>
+    <p class="meta">
+        React &bull; Node.js &bull; Express &bull; PostgreSQL &bull; JWT Authentication<br>
+        February 2026
+    </p>
+</div>
+
+<!-- ============================================================ -->
+<h2><span class="section-number">1</span> Tech Stack</h2>
+
+<table>
+    <tr><th>Layer</th><th>Technology</th><th>Purpose</th></tr>
+    <tr><td>Frontend</td><td><strong>React</strong> (Vite)</td><td>UI framework with fast HMR build tool</td></tr>
+    <tr><td>Backend</td><td><strong>Node.js + Express.js</strong></td><td>REST API server</td></tr>
+    <tr><td>Database</td><td><strong>PostgreSQL</strong></td><td>Relational database</td></tr>
+    <tr><td>ORM</td><td><strong>Prisma</strong></td><td>Type-safe database access &amp; migrations</td></tr>
+    <tr><td>Auth</td><td><strong>JWT</strong> (access + refresh tokens)</td><td>Stateless authentication</td></tr>
+    <tr><td>Password</td><td><strong>bcrypt</strong> (cost factor 12)</td><td>Password hashing</td></tr>
+    <tr><td>State Mgmt</td><td><strong>React Context</strong> + <strong>TanStack Query</strong></td><td>Auth state + server state caching</td></tr>
+    <tr><td>Validation</td><td><strong>Zod</strong></td><td>Shared client/server schema validation</td></tr>
+</table>
+
+<div class="info-box">
+    <p><strong>Why PostgreSQL?</strong> Leave management is inherently relational — users belong to departments, leaves belong to users, balances are per-user-per-type-per-year. PostgreSQL provides strict schema enforcement, JOINs, foreign keys, and advanced query features (window functions, CTEs) ideal for leave balance calculations and reporting.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2><span class="section-number">2</span> Roles &amp; Permissions</h2>
+
+<h3>Role Definitions</h3>
+<table>
+    <tr><th>Role</th><th>Description</th></tr>
+    <tr><td><span class="badge badge-blue">Employee</span></td><td>Regular staff. Request leave, view/cancel own leaves, view own balance.</td></tr>
+    <tr><td><span class="badge badge-orange">Manager</span></td><td>Department head. All employee actions + approve/reject department leaves, view team calendar.</td></tr>
+    <tr><td><span class="badge badge-green">Admin</span></td><td>System admin. Full access — manage users, departments, leave types, all leaves, balances.</td></tr>
+</table>
+
+<h3>Permission Matrix</h3>
+<table>
+    <tr><th>Action</th><th>Employee</th><th>Manager</th><th>Admin</th></tr>
+    <tr><td>Submit leave request</td><td>Own</td><td>Own</td><td>Own</td></tr>
+    <tr><td>View own leaves</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+    <tr><td>Cancel own pending leave</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+    <tr><td>View team leaves</td><td>No</td><td>Own dept</td><td>All</td></tr>
+    <tr><td>Approve/Reject leave</td><td>No</td><td>Own dept</td><td>All</td></tr>
+    <tr><td>View all users</td><td>No</td><td>Own dept</td><td>All</td></tr>
+    <tr><td>Create/Edit users</td><td>No</td><td>No</td><td>Yes</td></tr>
+    <tr><td>Manage departments</td><td>No</td><td>No</td><td>Yes</td></tr>
+    <tr><td>Configure leave types</td><td>No</td><td>No</td><td>Yes</td></tr>
+    <tr><td>Set leave balances</td><td>No</td><td>No</td><td>Yes</td></tr>
+    <tr><td>Delete leave records</td><td>No</td><td>No</td><td>Yes</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<div class="page-break"></div>
+<h2><span class="section-number">3</span> Project Structure</h2>
+
+<pre>
+leave-management/
+├── client/                          # React frontend (Vite)
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── common/              # Button, Input, Modal, StatusBadge, StatCard, etc.
+│   │   │   ├── layout/              # Sidebar, Header, Layout
+│   │   │   ├── dashboard/           # Dashboard, StatsGrid, RecentLeaves
+│   │   │   ├── leaves/              # LeaveRequestForm, LeaveList, LeaveCard, LeaveFilters
+│   │   │   ├── auth/                # LoginForm, RegisterForm
+│   │   │   └── admin/               # UserManagement, DepartmentManagement, LeaveTypeConfig
+│   │   ├── pages/                   # LoginPage, DashboardPage, MyLeavesPage, etc.
+│   │   ├── hooks/                   # useAuth, useLeaves, useLeaveBalance
+│   │   ├── context/                 # AuthContext
+│   │   ├── services/                # api.js (axios), authService, leaveService, userService
+│   │   ├── utils/                   # dateUtils, constants, validators
+│   │   └── assets/css/              # variables.css (design tokens)
+│   ├── vite.config.js
+│   └── package.json
+│
+├── server/                          # Express backend
+│   ├── src/
+│   │   ├── config/                  # database.js, env.js, cors.js
+│   │   ├── middleware/              # auth.js, roleCheck.js, validate.js, errorHandler.js
+│   │   ├── routes/                  # auth, leave, user, department, leaveBalance
+│   │   ├── controllers/             # auth, leave, user, department, leaveBalance
+│   │   ├── services/                # auth, leave, user, leaveBalance
+│   │   ├── utils/                   # apiError.js, catchAsync.js, dateUtils.js, constants.js
+│   │   ├── app.js                   # Express app setup
+│   │   └── server.js                # Entry point
+│   ├── prisma/
+│   │   ├── schema.prisma            # Database schema
+│   │   ├── migrations/
+│   │   └── seed.js                  # Seed data
+│   ├── package.json
+│   └── .env
+│
+└── .gitignore
+</pre>
+
+<!-- ============================================================ -->
+<h2><span class="section-number">4</span> Database Schema</h2>
+
+<h3>Entity Relationship</h3>
+<p><strong>Models:</strong> User, Department, LeaveType, Leave, LeaveBalance</p>
+
+<table>
+    <tr><th>Model</th><th>Key Fields</th><th>Relations</th></tr>
+    <tr>
+        <td><strong>User</strong></td>
+        <td>id (UUID), email, passwordHash, firstName, lastName, role (employee/manager/admin), isActive, departmentId</td>
+        <td>belongs to Department, has many Leaves, has many LeaveBalances</td>
+    </tr>
+    <tr>
+        <td><strong>Department</strong></td>
+        <td>id (UUID), name, description</td>
+        <td>has many Users</td>
+    </tr>
+    <tr>
+        <td><strong>LeaveType</strong></td>
+        <td>id (UUID), name, defaultDaysPerYear, requiresApproval, isActive</td>
+        <td>has many Leaves, has many LeaveBalances</td>
+    </tr>
+    <tr>
+        <td><strong>Leave</strong></td>
+        <td>id (UUID), requesterId, leaveTypeId, startDate, endDate, totalDays, reason, status (pending/approved/rejected/cancelled), reviewerId, reviewComment, reviewedAt</td>
+        <td>belongs to User (requester), belongs to User (reviewer), belongs to LeaveType</td>
+    </tr>
+    <tr>
+        <td><strong>LeaveBalance</strong></td>
+        <td>id (UUID), userId, leaveTypeId, year, allocated, used, pending</td>
+        <td>belongs to User, belongs to LeaveType. Unique constraint: (userId, leaveTypeId, year)</td>
+    </tr>
+</table>
+
+<h3>Default Seed Data</h3>
+<table>
+    <tr><th>Leave Type</th><th>Days/Year</th></tr>
+    <tr><td>Annual Leave</td><td>21</td></tr>
+    <tr><td>Sick Leave</td><td>10</td></tr>
+    <tr><td>Personal Leave</td><td>5</td></tr>
+    <tr><td>Maternity/Paternity Leave</td><td>90</td></tr>
+    <tr><td>Unpaid Leave</td><td>30</td></tr>
+    <tr><td>Compassionate Leave</td><td>5</td></tr>
+</table>
+
+<p><strong>Default departments:</strong> Engineering, Human Resources, Finance, Marketing, Operations</p>
+<p><strong>Default accounts:</strong> Created via <code>prisma db seed</code> (see <code>server/prisma/seed.js</code>)</p>
+
+<!-- ============================================================ -->
+<div class="page-break"></div>
+<h2><span class="section-number">5</span> API Endpoints</h2>
+
+<p>Base URL: <code>/api/v1</code></p>
+
+<h3>Authentication</h3>
+<table>
+    <tr><th>Method</th><th>Endpoint</th><th>Description</th><th>Auth</th></tr>
+    <tr><td>POST</td><td>/auth/register</td><td>Register new user</td><td>No</td></tr>
+    <tr><td>POST</td><td>/auth/login</td><td>Login, get tokens</td><td>No</td></tr>
+    <tr><td>POST</td><td>/auth/refresh</td><td>Refresh access token</td><td>Cookie</td></tr>
+    <tr><td>POST</td><td>/auth/logout</td><td>Logout, clear tokens</td><td>Yes</td></tr>
+    <tr><td>GET</td><td>/auth/me</td><td>Get current user profile</td><td>Yes</td></tr>
+    <tr><td>PATCH</td><td>/auth/change-password</td><td>Change own password</td><td>Yes</td></tr>
+</table>
+
+<h3>Leaves</h3>
+<table>
+    <tr><th>Method</th><th>Endpoint</th><th>Description</th><th>Roles</th></tr>
+    <tr><td>POST</td><td>/leaves</td><td>Create leave request</td><td>All</td></tr>
+    <tr><td>GET</td><td>/leaves/my</td><td>Get own leave requests</td><td>All</td></tr>
+    <tr><td>GET</td><td>/leaves/team</td><td>Get team leaves</td><td>Manager, Admin</td></tr>
+    <tr><td>GET</td><td>/leaves</td><td>Get all leaves (filterable)</td><td>Admin</td></tr>
+    <tr><td>GET</td><td>/leaves/:id</td><td>Get single leave</td><td>Owner, Manager, Admin</td></tr>
+    <tr><td>PATCH</td><td>/leaves/:id/status</td><td>Approve/Reject</td><td>Manager (dept), Admin</td></tr>
+    <tr><td>PATCH</td><td>/leaves/:id/cancel</td><td>Cancel own pending</td><td>Owner</td></tr>
+    <tr><td>DELETE</td><td>/leaves/:id</td><td>Delete leave record</td><td>Admin</td></tr>
+</table>
+
+<h3>Users</h3>
+<table>
+    <tr><th>Method</th><th>Endpoint</th><th>Description</th><th>Roles</th></tr>
+    <tr><td>GET</td><td>/users</td><td>List users (paginated)</td><td>Admin</td></tr>
+    <tr><td>GET</td><td>/users/:id</td><td>Get user details</td><td>Admin, Self</td></tr>
+    <tr><td>POST</td><td>/users</td><td>Create user</td><td>Admin</td></tr>
+    <tr><td>PATCH</td><td>/users/:id</td><td>Update user</td><td>Admin</td></tr>
+    <tr><td>PATCH</td><td>/users/:id/role</td><td>Change role</td><td>Admin</td></tr>
+    <tr><td>DELETE</td><td>/users/:id</td><td>Deactivate user</td><td>Admin</td></tr>
+</table>
+
+<h3>Departments</h3>
+<table>
+    <tr><th>Method</th><th>Endpoint</th><th>Description</th><th>Roles</th></tr>
+    <tr><td>GET</td><td>/departments</td><td>List all departments</td><td>All</td></tr>
+    <tr><td>POST</td><td>/departments</td><td>Create department</td><td>Admin</td></tr>
+    <tr><td>PATCH</td><td>/departments/:id</td><td>Update department</td><td>Admin</td></tr>
+    <tr><td>DELETE</td><td>/departments/:id</td><td>Delete department</td><td>Admin</td></tr>
+</table>
+
+<h3>Leave Balances</h3>
+<table>
+    <tr><th>Method</th><th>Endpoint</th><th>Description</th><th>Roles</th></tr>
+    <tr><td>GET</td><td>/leave-balances/my</td><td>Get own balances</td><td>All</td></tr>
+    <tr><td>GET</td><td>/leave-balances/user/:userId</td><td>Get user's balances</td><td>Manager, Admin</td></tr>
+    <tr><td>POST</td><td>/leave-balances/allocate</td><td>Allocate balances (bulk)</td><td>Admin</td></tr>
+    <tr><td>PATCH</td><td>/leave-balances/:id</td><td>Adjust balance</td><td>Admin</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<div class="page-break"></div>
+<h2><span class="section-number">6</span> Authentication Flow</h2>
+
+<ol>
+    <li><strong>Login:</strong> User sends email/password to <code>POST /auth/login</code></li>
+    <li><strong>Server validates:</strong> Finds user by email, compares password hash with bcrypt</li>
+    <li><strong>Tokens issued:</strong> Access token (15min, in response body) + Refresh token (7 days, httpOnly cookie)</li>
+    <li><strong>Client stores:</strong> Access token in memory (React state), refresh token auto-managed via cookie</li>
+    <li><strong>API calls:</strong> Every request includes <code>Authorization: Bearer &lt;accessToken&gt;</code></li>
+    <li><strong>Token refresh:</strong> On 401, axios interceptor calls <code>POST /auth/refresh</code> using the cookie, gets new access token, retries the request</li>
+    <li><strong>Logout:</strong> Clears the refresh token cookie server-side</li>
+</ol>
+
+<h3>JWT Payload</h3>
+<pre>{ userId: "uuid", role: "employee|manager|admin", departmentId: "uuid", iat, exp }</pre>
+
+<!-- ============================================================ -->
+<h2><span class="section-number">7</span> Frontend Routes</h2>
+
+<table>
+    <tr><th>Route</th><th>Page</th><th>Access</th></tr>
+    <tr><td>/login</td><td>LoginPage</td><td>Public</td></tr>
+    <tr><td>/register</td><td>RegisterPage</td><td>Public</td></tr>
+    <tr><td>/dashboard</td><td>DashboardPage</td><td>All authenticated</td></tr>
+    <tr><td>/leaves/my</td><td>MyLeavesPage</td><td>All authenticated</td></tr>
+    <tr><td>/leaves/new</td><td>NewLeavePage</td><td>All authenticated</td></tr>
+    <tr><td>/leaves/:id</td><td>LeaveDetailPage</td><td>All authenticated</td></tr>
+    <tr><td>/leaves/team</td><td>TeamLeavesPage</td><td>Manager, Admin</td></tr>
+    <tr><td>/leaves/all</td><td>AllLeavesPage</td><td>Admin</td></tr>
+    <tr><td>/balances</td><td>LeaveBalancePage</td><td>All authenticated</td></tr>
+    <tr><td>/profile</td><td>ProfilePage</td><td>All authenticated</td></tr>
+    <tr><td>/admin/users</td><td>UserManagement</td><td>Admin</td></tr>
+    <tr><td>/admin/departments</td><td>DepartmentManagement</td><td>Admin</td></tr>
+    <tr><td>/admin/leave-types</td><td>LeaveTypeConfig</td><td>Admin</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<h2><span class="section-number">8</span> Dependencies</h2>
+
+<h3>Backend (server/package.json)</h3>
+<table>
+    <tr><th>Package</th><th>Purpose</th></tr>
+    <tr><td>express</td><td>HTTP framework</td></tr>
+    <tr><td>@prisma/client</td><td>Database ORM client</td></tr>
+    <tr><td>prisma (dev)</td><td>Schema management &amp; migrations</td></tr>
+    <tr><td>bcryptjs</td><td>Password hashing</td></tr>
+    <tr><td>jsonwebtoken</td><td>JWT creation &amp; verification</td></tr>
+    <tr><td>cookie-parser</td><td>Parse httpOnly cookies</td></tr>
+    <tr><td>cors</td><td>Cross-origin configuration</td></tr>
+    <tr><td>dotenv</td><td>Environment variables</td></tr>
+    <tr><td>zod</td><td>Request validation</td></tr>
+    <tr><td>express-rate-limit</td><td>Rate limiting for auth endpoints</td></tr>
+    <tr><td>helmet</td><td>Security headers</td></tr>
+    <tr><td>morgan</td><td>HTTP request logging</td></tr>
+    <tr><td>nodemon (dev)</td><td>Auto-restart in development</td></tr>
+</table>
+
+<h3>Frontend (client/package.json)</h3>
+<table>
+    <tr><th>Package</th><th>Purpose</th></tr>
+    <tr><td>react, react-dom</td><td>UI library</td></tr>
+    <tr><td>react-router-dom</td><td>Client-side routing</td></tr>
+    <tr><td>@tanstack/react-query</td><td>Server state management</td></tr>
+    <tr><td>axios</td><td>HTTP client</td></tr>
+    <tr><td>react-hook-form</td><td>Form management</td></tr>
+    <tr><td>zod + @hookform/resolvers</td><td>Form validation</td></tr>
+    <tr><td>react-hot-toast</td><td>Toast notifications</td></tr>
+    <tr><td>date-fns</td><td>Date manipulation</td></tr>
+    <tr><td>react-icons</td><td>Icon library</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<div class="page-break"></div>
+<h2><span class="section-number">9</span> Implementation Order</h2>
+
+<ol>
+    <li><strong>Backend foundation</strong> — Express setup, Prisma schema, migrations, seed data</li>
+    <li><strong>Auth system</strong> — Register/login/refresh/logout endpoints + JWT &amp; role middleware</li>
+    <li><strong>Leave CRUD API</strong> — Full status workflow + balance updates on approve/reject</li>
+    <li><strong>User, Department &amp; Balance APIs</strong> — Admin CRUD + pagination/filtering</li>
+    <li><strong>Frontend scaffold</strong> — Vite + React, routing, AuthContext, API layer, login page</li>
+    <li><strong>Core UI</strong> — Dashboard, leave request form, leave list (migrating existing design)</li>
+    <li><strong>Role-specific views</strong> — Team leaves (manager), admin panels</li>
+    <li><strong>Leave Balance UI</strong> — Balance page, profile page, balance validation on create</li>
+</ol>
+
+<!-- ============================================================ -->
+<h2><span class="section-number">10</span> Future Enhancements</h2>
+
+<table>
+    <tr><th>Phase</th><th>Feature</th><th>Description</th></tr>
+    <tr><td>Phase 2</td><td>Email Notifications</td><td>Notify managers on new requests, employees on approval/rejection</td></tr>
+    <tr><td>Phase 2</td><td>Leave Calendar View</td><td>Visual calendar showing team availability</td></tr>
+    <tr><td>Phase 2</td><td>Public Holidays</td><td>Auto-exclude holidays from leave day calculations</td></tr>
+    <tr><td>Phase 2</td><td>Audit Log</td><td>Track all status changes with timestamps and actors</td></tr>
+    <tr><td>Phase 2</td><td>File Attachments</td><td>Upload medical certificates for sick leave</td></tr>
+    <tr><td>Phase 3</td><td>Leave Policies Engine</td><td>Configurable rules (max days, advance notice, blackout periods)</td></tr>
+    <tr><td>Phase 3</td><td>Reports &amp; Analytics</td><td>Charts, trends, utilization by department, CSV/PDF export</td></tr>
+    <tr><td>Phase 3</td><td>Manager Delegation</td><td>Delegate approval authority when on leave</td></tr>
+    <tr><td>Phase 3</td><td>Multi-level Approval</td><td>Require manager + HR approval for long leaves</td></tr>
+</table>
+
+<div class="footer">
+    <p>HR LeaveFlow — Architecture Plan &bull; February 2026</p>
+    <p>Stack: React &bull; Node.js &bull; Express &bull; PostgreSQL &bull; Prisma &bull; JWT</p>
+</div>
+
+</body>
+</html>

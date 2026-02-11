@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HR LeaveFlow</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>HR LeaveFlow</h1>
+            <p class="subtitle">Manage your team's time off requests</p>
+        </header>
+
+        <div class="dashboard">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-label">Total Leaves</span>
+                    <div class="stat-icon icon-blue">📋</div>
+                </div>
+                <div class="stat-value" id="totalLeaves">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-label">Pending</span>
+                    <div class="stat-icon icon-orange">⏳</div>
+                </div>
+                <div class="stat-value" id="pendingLeaves">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-label">Approved</span>
+                    <div class="stat-icon icon-green">✓</div>
+                </div>
+                <div class="stat-value" id="approvedLeaves">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-label">Rejected</span>
+                    <div class="stat-icon icon-red">✕</div>
+                </div>
+                <div class="stat-value" id="rejectedLeaves">0</div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="leave-form-section">
+                <h2 class="section-title">Request New Leave</h2>
+
+                <div id="daysIndicator" class="days-indicator">
+                    <div class="days-indicator-label">Total Days</div>
+                    <div class="days-indicator-value" id="daysCount">0</div>
+                </div>
+
+                <form id="leaveForm">
+                    <div class="form-group">
+                        <label for="employeeName">Employee Name</label>
+                        <input type="text" id="employeeName" name="employeeName" placeholder="Enter employee name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="leaveType">Leave Type</label>
+                        <select id="leaveType" name="leaveType" required>
+                            <option value="">Select leave type</option>
+                            <option value="Annual Leave">Annual Leave</option>
+                            <option value="Sick Leave">Sick Leave</option>
+                            <option value="Personal Leave">Personal Leave</option>
+                            <option value="Maternity/Paternity">Maternity/Paternity Leave</option>
+                            <option value="Unpaid Leave">Unpaid Leave</option>
+                            <option value="Compassionate Leave">Compassionate Leave</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="startDate">Start Date</label>
+                            <input type="date" id="startDate" name="startDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="endDate">End Date</label>
+                            <input type="date" id="endDate" name="endDate" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reason">Reason</label>
+                        <textarea id="reason" name="reason" placeholder="Enter reason for leave request" required></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <span>Submit Request</span>
+                        <span>→</span>
+                    </button>
+                </form>
+            </div>
+
+            <div class="leave-list-section">
+                <h2 class="section-title">Leave Requests</h2>
+                <div id="leaveList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
