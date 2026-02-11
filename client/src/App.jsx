@@ -29,7 +29,7 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <BrowserRouter>
+        <BrowserRouter basename="/HR-LeaveFlow">
           <Routes>
             {/* Public routes */}
             <Route path="/login" element={<LoginPage />} />
