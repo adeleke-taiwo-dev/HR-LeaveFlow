@@ -24,7 +24,7 @@ export default function LeaveTrendsChart() {
     <div className="leave-trends-chart">
       <h3>Leave Trends (Last 6 Months)</h3>
       <div className="chart-container">
-        <LeavesTrendChart data={stats.byMonth} />
+        <LeavesTrendChart data={stats.byMonth || []} />
       </div>
     </div>
   );

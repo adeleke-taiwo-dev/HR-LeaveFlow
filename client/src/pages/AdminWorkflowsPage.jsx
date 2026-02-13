@@ -103,8 +103,8 @@ export default function AdminWorkflowsPage() {
     return <div className="loading">Loading workflows...</div>;
   }
 
-  const workflowList = workflows?.data || [];
-  const leaveTypeList = leaveTypes?.data || [];
+  const workflowList = Array.isArray(workflows?.data) ? workflows.data : [];
+  const leaveTypeList = Array.isArray(leaveTypes?.data) ? leaveTypes.data : [];
   const existingLeaveTypeIds = workflowList.map((w) => w.leaveTypeId);
   const availableLeaveTypes = leaveTypeList.filter((lt) => !existingLeaveTypeIds.includes(lt.id));
 
@@ -123,10 +123,7 @@ export default function AdminWorkflowsPage() {
       <div className="workflows-list">
         {workflowList.length === 0 ? (
           <div className="empty-state">
-            <p>No workflows configured yet</p>
-            <button className="btn btn-primary" onClick={() => setShowCreateModal(true)}>
-              Create Your First Workflow
-            </button>
+            <p>No workflows configured yet. Click "+ Create Workflow" above to get started.</p>
           </div>
         ) : (
           <div className="workflows-grid">

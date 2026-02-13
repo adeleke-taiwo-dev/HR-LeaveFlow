@@ -64,7 +64,7 @@ export default function QuickActions() {
     );
   }
 
-  const leaves = data?.data || [];
+  const leaves = Array.isArray(data?.data) ? data.data : [];
 
   return (
     <div className="quick-actions">

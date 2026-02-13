@@ -13,7 +13,7 @@ export default function UpcomingLeaves() {
     return <div className="upcoming-leaves-loading">Loading upcoming leaves...</div>;
   }
 
-  const leaves = data?.data || [];
+  const leaves = Array.isArray(data?.data) ? data.data : [];
 
   return (
     <div className="upcoming-leaves">
