@@ -4,6 +4,7 @@ const leaveRoutes = require('./leave.routes');
 const userRoutes = require('./user.routes');
 const departmentRoutes = require('./department.routes');
 const leaveBalanceRoutes = require('./leaveBalance.routes');
+const workflowRoutes = require('./workflow.routes');
 
 const router = express.Router();
 
@@ -12,5 +13,6 @@ router.use('/leaves', leaveRoutes);
 router.use('/users', userRoutes);
 router.use('/departments', departmentRoutes);
 router.use('/leave-balances', leaveBalanceRoutes);
+router.use('/workflows', workflowRoutes);
 
 module.exports = router;

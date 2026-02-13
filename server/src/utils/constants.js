@@ -9,6 +9,7 @@ const LEAVE_STATUS = {
   APPROVED: 'approved',
   REJECTED: 'rejected',
   CANCELLED: 'cancelled',
+  PENDING_HR: 'pending_hr',
 };
 
 module.exports = { ROLES, LEAVE_STATUS };

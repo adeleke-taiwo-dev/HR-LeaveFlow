@@ -49,13 +49,13 @@ export default function TeamLeavesPage() {
       </div>
 
       <div className="filter-bar">
-        {['', 'pending', 'approved', 'rejected', 'cancelled'].map((s) => (
+        {['', 'pending', 'pending_hr', 'approved', 'rejected', 'cancelled'].map((s) => (
           <button
             key={s}
             className={`filter-btn ${filter === s ? 'active' : ''}`}
             onClick={() => setFilter(s)}
           >
-            {s || 'All'}
+            {s === 'pending_hr' ? 'Awaiting HR' : (s || 'All')}
           </button>
         ))}
       </div>
@@ -87,7 +87,26 @@ export default function TeamLeavesPage() {
                 <span className="leave-card-days">{leave.totalDays} {leave.totalDays === 1 ? 'day' : 'days'}</span>
               </div>
               <div className="leave-card-reason">{leave.reason}</div>
-              {leave.status === 'pending' && (
+
+              {/* Multi-level approval info */}
+              {(leave.managerReviewer || leave.hrReviewer) && (
+                <div className="approval-info">
+                  {leave.managerReviewer && (
+                    <div className="approval-step">
+                      <strong>Manager:</strong> Approved by {leave.managerReviewer.firstName} {leave.managerReviewer.lastName}
+                      {leave.managerComment && <div className="approval-comment">"{leave.managerComment}"</div>}
+                    </div>
+                  )}
+                  {leave.hrReviewer && (
+                    <div className="approval-step">
+                      <strong>HR:</strong> {leave.status === 'approved' ? 'Approved' : 'Reviewed'} by {leave.hrReviewer.firstName} {leave.hrReviewer.lastName}
+                      {leave.hrComment && <div className="approval-comment">"{leave.hrComment}"</div>}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {(leave.status === 'pending' || leave.status === 'pending_hr') && (
                 <div className="leave-card-actions">
                   <button className="btn-action btn-approve" onClick={() => handleAction(leave.id, 'approved')}>
                     Approve

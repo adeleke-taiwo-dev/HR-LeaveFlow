@@ -1,7 +1,8 @@
-import { STATUS_COLORS } from '../../utils/constants';
+import { STATUS_COLORS, STATUS_LABELS } from '../../utils/constants';
 
 export default function StatusBadge({ status }) {
   const colors = STATUS_COLORS[status] || STATUS_COLORS.pending;
+  const label = STATUS_LABELS[status] || status;
 
   return (
     <span
@@ -16,7 +17,7 @@ export default function StatusBadge({ status }) {
         color: colors.color,
       }}
     >
-      {status}
+      {label}
     </span>
   );
 }

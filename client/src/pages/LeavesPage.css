@@ -278,8 +278,51 @@
   cursor: not-allowed;
 }
 
+.approval-info {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: #f0f9ff;
+  border-left: 3px solid var(--accent-blue);
+  border-radius: 6px;
+}
+
+.approval-step {
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.approval-step:last-child {
+  margin-bottom: 0;
+}
+
+.approval-step strong {
+  color: var(--accent-blue);
+}
+
+.approval-comment {
+  margin-top: 0.25rem;
+  font-style: italic;
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  padding-left: 1rem;
+}
+
 @media (max-width: 480px) {
   .leave-form-card .form-row {
     grid-template-columns: 1fr;
+  }
+
+  .filter-bar {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+  }
+
+  .leave-card-actions {
+    flex-direction: column;
+  }
+
+  .btn-action {
+    width: 100%;
   }
 }

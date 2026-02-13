@@ -4,6 +4,9 @@ import { leaveService } from '../services/leaveService';
 import { leaveBalanceService } from '../services/userService';
 import StatCard from '../components/common/StatCard';
 import StatusBadge from '../components/common/StatusBadge';
+import UpcomingLeaves from '../components/dashboard/UpcomingLeaves';
+import LeaveTrendsChart from '../components/dashboard/LeaveTrendsChart';
+import QuickActions from '../components/dashboard/QuickActions';
 import { formatDate } from '../utils/dateUtils';
 import { ROLES } from '../utils/constants';
 import { HiOutlineClipboardList, HiOutlineClock, HiOutlineCheckCircle, HiOutlineXCircle } from 'react-icons/hi';
@@ -126,6 +129,19 @@ export default function DashboardPage() {
           )}
         </div>
       </div>
+
+      {/* Quick Actions for Managers and Admins */}
+      {(user.role === ROLES.MANAGER || user.role === ROLES.ADMIN) && (
+        <QuickActions />
+      )}
+
+      {/* Upcoming Leaves */}
+      {(user.role === ROLES.MANAGER || user.role === ROLES.ADMIN) && (
+        <UpcomingLeaves />
+      )}
+
+      {/* Leave Trends Chart */}
+      <LeaveTrendsChart />
     </div>
   );
 }

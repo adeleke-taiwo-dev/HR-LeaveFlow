@@ -15,6 +15,8 @@ import ProfilePage from './pages/ProfilePage';
 import AdminUsersPage from './pages/AdminUsersPage';
 import AdminDepartmentsPage from './pages/AdminDepartmentsPage';
 import AdminLeaveTypesPage from './pages/AdminLeaveTypesPage';
+import AdminWorkflowsPage from './pages/AdminWorkflowsPage';
+import ReportsPage from './pages/ReportsPage';
 import CalendarPage from './pages/CalendarPage';
 
 const queryClient = new QueryClient({
@@ -60,6 +62,14 @@ export default function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="/reports"
+                element={
+                  <ProtectedRoute allowedRoles={['manager', 'admin']}>
+                    <ReportsPage />
+                  </ProtectedRoute>
+                }
+              />
 
               {/* Admin only */}
               <Route
@@ -83,6 +93,14 @@ export default function App() {
                 element={
                   <ProtectedRoute allowedRoles={['admin']}>
                     <AdminLeaveTypesPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/workflows"
+                element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <AdminWorkflowsPage />
                   </ProtectedRoute>
                 }
               />

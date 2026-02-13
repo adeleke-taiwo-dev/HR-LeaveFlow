@@ -26,6 +26,14 @@ const updateStatusSchema = z.object({
 // All leave routes require authentication
 router.use(authenticate);
 
+// Reports and export endpoints
+router.get('/export', authorize('manager', 'admin'), leaveController.exportLeaves);
+router.get('/reports/annual/:userId/:year', authorize('manager', 'admin'), leaveController.getAnnualReport);
+router.get('/reports/department/:deptId', authorize('admin'), leaveController.getDepartmentAnalytics);
+router.get('/upcoming', authorize('manager', 'admin'), leaveController.getUpcomingLeaves);
+router.get('/stats', leaveController.getLeaveStats);
+
+// Regular leave endpoints
 router.post('/', validate(createLeaveSchema), leaveController.createLeave);
 router.get('/my', leaveController.getMyLeaves);
 router.get('/calendar', leaveController.getCalendarLeaves);

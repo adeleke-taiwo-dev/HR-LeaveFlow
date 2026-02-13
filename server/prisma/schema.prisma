@@ -18,6 +18,7 @@ enum LeaveStatus {
   approved
   rejected
   cancelled
+  pending_hr
 }
 
 model User {
@@ -32,10 +33,12 @@ model User {
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
-  department     Department?    @relation(fields: [departmentId], references: [id])
-  leaveRequests  Leave[]        @relation("LeaveRequester")
-  reviewedLeaves Leave[]        @relation("LeaveReviewer")
-  leaveBalances  LeaveBalance[]
+  department           Department?    @relation(fields: [departmentId], references: [id])
+  leaveRequests        Leave[]        @relation("LeaveRequester")
+  reviewedLeaves       Leave[]        @relation("LeaveReviewer")
+  managerReviewedLeaves Leave[]       @relation("ManagerReviewer")
+  hrReviewedLeaves     Leave[]        @relation("HRReviewer")
+  leaveBalances        LeaveBalance[]
 
   @@map("users")
 }
@@ -60,30 +63,40 @@ model LeaveType {
   isActive           Boolean  @default(true) @map("is_active")
   createdAt          DateTime @default(now()) @map("created_at")
 
-  leaves        Leave[]
-  leaveBalances LeaveBalance[]
+  leaves            Leave[]
+  leaveBalances     LeaveBalance[]
+  approvalWorkflows ApprovalWorkflow[]
 
   @@map("leave_types")
 }
 
 model Leave {
-  id            String      @id @default(uuid())
-  requesterId   String      @map("requester_id")
-  leaveTypeId   String      @map("leave_type_id")
-  startDate     DateTime    @map("start_date") @db.Date
-  endDate       DateTime    @map("end_date") @db.Date
-  totalDays     Int         @map("total_days")
-  reason        String
-  status        LeaveStatus @default(pending)
-  reviewerId    String?     @map("reviewer_id")
-  reviewComment String?     @map("review_comment")
-  reviewedAt    DateTime?   @map("reviewed_at")
-  createdAt     DateTime    @default(now()) @map("created_at")
-  updatedAt     DateTime    @updatedAt @map("updated_at")
+  id                   String      @id @default(uuid())
+  requesterId          String      @map("requester_id")
+  leaveTypeId          String      @map("leave_type_id")
+  startDate            DateTime    @map("start_date") @db.Date
+  endDate              DateTime    @map("end_date") @db.Date
+  totalDays            Int         @map("total_days")
+  reason               String
+  status               LeaveStatus @default(pending)
+  reviewerId           String?     @map("reviewer_id")
+  reviewComment        String?     @map("review_comment")
+  reviewedAt           DateTime?   @map("reviewed_at")
+  managerReviewerId    String?     @map("manager_reviewer_id")
+  managerReviewedAt    DateTime?   @map("manager_reviewed_at")
+  managerComment       String?     @map("manager_comment")
+  hrReviewerId         String?     @map("hr_reviewer_id")
+  hrReviewedAt         DateTime?   @map("hr_reviewed_at")
+  hrComment            String?     @map("hr_comment")
+  currentApprovalStep  String      @default("manager") @map("current_approval_step")
+  createdAt            DateTime    @default(now()) @map("created_at")
+  updatedAt            DateTime    @updatedAt @map("updated_at")
 
-  requester User      @relation("LeaveRequester", fields: [requesterId], references: [id])
-  reviewer  User?     @relation("LeaveReviewer", fields: [reviewerId], references: [id])
-  leaveType LeaveType @relation(fields: [leaveTypeId], references: [id])
+  requester       User      @relation("LeaveRequester", fields: [requesterId], references: [id])
+  reviewer        User?     @relation("LeaveReviewer", fields: [reviewerId], references: [id])
+  managerReviewer User?     @relation("ManagerReviewer", fields: [managerReviewerId], references: [id])
+  hrReviewer      User?     @relation("HRReviewer", fields: [hrReviewerId], references: [id])
+  leaveType       LeaveType @relation(fields: [leaveTypeId], references: [id])
 
   @@index([requesterId])
   @@index([status])
@@ -107,4 +120,17 @@ model LeaveBalance {
 
   @@unique([userId, leaveTypeId, year])
   @@map("leave_balances")
+}
+
+model ApprovalWorkflow {
+  id           String    @id @default(uuid())
+  leaveTypeId  String    @unique @map("leave_type_id")
+  requiresHR   Boolean   @default(false) @map("requires_hr")
+  minDaysForHR Int?      @map("min_days_for_hr")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  leaveType LeaveType @relation(fields: [leaveTypeId], references: [id], onDelete: Cascade)
+
+  @@map("approval_workflows")
 }

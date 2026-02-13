@@ -2,6 +2,7 @@ const prisma = require('../config/database');
 const ApiError = require('../utils/apiError');
 const { calculateLeaveDays } = require('../utils/dateUtils');
 const { LEAVE_STATUS, ROLES } = require('../utils/constants');
+const workflowService = require('./workflowService');
 
 async function createLeave(userId, { leaveTypeId, startDate, endDate, reason }) {
   const start = new Date(startDate);
@@ -195,11 +196,13 @@ async function getLeaveById(leaveId, user) {
 async function updateLeaveStatus(leaveId, reviewerId, { status, reviewComment }) {
   const leave = await prisma.leave.findUnique({
     where: { id: leaveId },
-    include: { requester: true },
+    include: { requester: true, leaveType: true },
   });
 
   if (!leave) throw new ApiError(404, 'Leave not found');
-  if (leave.status !== LEAVE_STATUS.PENDING) {
+
+  // Allow approval of pending or pending_hr leaves
+  if (![LEAVE_STATUS.PENDING, LEAVE_STATUS.PENDING_HR].includes(leave.status)) {
     throw new ApiError(400, 'Only pending leaves can be approved or rejected');
   }
 
@@ -210,19 +213,87 @@ async function updateLeaveStatus(leaveId, reviewerId, { status, reviewComment })
     throw new ApiError(403, 'You can only manage leaves from your department');
   }
 
+  // Check if HR approval is required
+  const requiresHR = await workflowService.requiresHRApproval(leave.leaveTypeId, leave.totalDays);
+
   const updated = await prisma.$transaction(async (tx) => {
-    const updatedLeave = await tx.leave.update({
-      where: { id: leaveId },
-      data: {
-        status,
+    let updateData = {};
+    let finalStatus = status;
+
+    // Multi-step approval logic
+    if (reviewer.role === ROLES.MANAGER && leave.status === LEAVE_STATUS.PENDING) {
+      // Manager is reviewing a pending leave
+      if (status === LEAVE_STATUS.REJECTED) {
+        // Manager rejection is final
+        updateData = {
+          status: LEAVE_STATUS.REJECTED,
+          managerReviewerId: reviewerId,
+          managerReviewedAt: new Date(),
+          managerComment: reviewComment,
+          reviewerId,
+          reviewComment,
+          reviewedAt: new Date(),
+          currentApprovalStep: 'completed',
+        };
+      } else if (status === LEAVE_STATUS.APPROVED) {
+        if (requiresHR) {
+          // Manager approves, but needs HR approval
+          finalStatus = LEAVE_STATUS.PENDING_HR;
+          updateData = {
+            status: LEAVE_STATUS.PENDING_HR,
+            managerReviewerId: reviewerId,
+            managerReviewedAt: new Date(),
+            managerComment: reviewComment,
+            currentApprovalStep: 'hr',
+          };
+        } else {
+          // Manager approval is final
+          updateData = {
+            status: LEAVE_STATUS.APPROVED,
+            managerReviewerId: reviewerId,
+            managerReviewedAt: new Date(),
+            managerComment: reviewComment,
+            reviewerId,
+            reviewComment,
+            reviewedAt: new Date(),
+            currentApprovalStep: 'completed',
+          };
+        }
+      }
+    } else if (reviewer.role === ROLES.ADMIN && leave.status === LEAVE_STATUS.PENDING_HR) {
+      // Admin/HR is reviewing a pending_hr leave
+      updateData = {
+        status: status, // Approved or Rejected
+        hrReviewerId: reviewerId,
+        hrReviewedAt: new Date(),
+        hrComment: reviewComment,
         reviewerId,
         reviewComment,
         reviewedAt: new Date(),
-      },
+        currentApprovalStep: 'completed',
+      };
+    } else if (reviewer.role === ROLES.ADMIN && leave.status === LEAVE_STATUS.PENDING) {
+      // Admin directly approving/rejecting (bypassing manager step)
+      updateData = {
+        status: status,
+        reviewerId,
+        reviewComment,
+        reviewedAt: new Date(),
+        currentApprovalStep: 'completed',
+      };
+    } else {
+      throw new ApiError(403, 'You do not have permission to review this leave at this stage');
+    }
+
+    const updatedLeave = await tx.leave.update({
+      where: { id: leaveId },
+      data: updateData,
       include: {
         requester: { include: { department: true } },
         leaveType: true,
         reviewer: { select: { id: true, firstName: true, lastName: true } },
+        managerReviewer: { select: { id: true, firstName: true, lastName: true } },
+        hrReviewer: { select: { id: true, firstName: true, lastName: true } },
       },
     });
 
@@ -239,7 +310,7 @@ async function updateLeaveStatus(leaveId, reviewerId, { status, reviewComment })
     });
 
     if (balance) {
-      if (status === LEAVE_STATUS.APPROVED) {
+      if (finalStatus === LEAVE_STATUS.APPROVED) {
         await tx.leaveBalance.update({
           where: { id: balance.id },
           data: {
@@ -247,12 +318,13 @@ async function updateLeaveStatus(leaveId, reviewerId, { status, reviewComment })
             used: { increment: leave.totalDays },
           },
         });
-      } else if (status === LEAVE_STATUS.REJECTED) {
+      } else if (finalStatus === LEAVE_STATUS.REJECTED) {
         await tx.leaveBalance.update({
           where: { id: balance.id },
           data: { pending: { decrement: leave.totalDays } },
         });
       }
+      // PENDING_HR doesn't change balance yet
     }
 
     return updatedLeave;
@@ -369,10 +441,191 @@ async function getCalendarLeaves(user, { startDate, endDate, departmentId }) {
   return leaves.map(sanitizeLeave);
 }
 
+async function getUpcomingLeaves(user, days = 30) {
+  const startDate = new Date();
+  const endDate = new Date();
+  endDate.setDate(endDate.getDate() + days);
+
+  const where = {
+    status: LEAVE_STATUS.APPROVED,
+    startDate: { gte: startDate, lte: endDate },
+  };
+
+  // Role-based filtering
+  if (user.role === ROLES.MANAGER) {
+    where.requester = { departmentId: user.departmentId };
+  } else if (user.role === ROLES.EMPLOYEE) {
+    where.requesterId = user.id;
+  }
+
+  const leaves = await prisma.leave.findMany({
+    where,
+    include: {
+      requester: { select: { id: true, firstName: true, lastName: true, department: true } },
+      leaveType: true,
+    },
+    orderBy: { startDate: 'asc' },
+    take: 10,
+  });
+
+  return leaves.map(sanitizeLeave);
+}
+
+async function getLeaveStats(user, dateRange = {}) {
+  const { startDate, endDate } = dateRange;
+
+  const where = {};
+  if (startDate || endDate) {
+    where.startDate = {};
+    if (startDate) where.startDate.gte = new Date(startDate);
+    if (endDate) where.startDate.lte = new Date(endDate);
+  } else {
+    // Default to last 6 months
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+    where.startDate = { gte: sixMonthsAgo };
+  }
+
+  // Role-based filtering
+  if (user.role === ROLES.MANAGER) {
+    where.requester = { departmentId: user.departmentId };
+  } else if (user.role === ROLES.EMPLOYEE) {
+    where.requesterId = user.id;
+  }
+
+  const leaves = await prisma.leave.findMany({
+    where,
+    include: {
+      leaveType: true,
+    },
+  });
+
+  // Calculate stats
+  const stats = {
+    total: leaves.length,
+    approved: leaves.filter(l => l.status === LEAVE_STATUS.APPROVED).length,
+    pending: leaves.filter(l => l.status === LEAVE_STATUS.PENDING).length,
+    rejected: leaves.filter(l => l.status === LEAVE_STATUS.REJECTED).length,
+    pendingHR: leaves.filter(l => l.status === LEAVE_STATUS.PENDING_HR).length,
+    totalDays: leaves.filter(l => l.status === LEAVE_STATUS.APPROVED).reduce((sum, l) => sum + l.totalDays, 0),
+    byType: {},
+    byMonth: {},
+  };
+
+  // Group by leave type
+  leaves.forEach(leave => {
+    const typeName = leave.leaveType.name;
+    if (!stats.byType[typeName]) {
+      stats.byType[typeName] = { count: 0, days: 0 };
+    }
+    stats.byType[typeName].count++;
+    if (leave.status === LEAVE_STATUS.APPROVED) {
+      stats.byType[typeName].days += leave.totalDays;
+    }
+  });
+
+  // Group by month
+  leaves.forEach(leave => {
+    const monthYear = new Date(leave.startDate).toISOString().substring(0, 7); // YYYY-MM
+    if (!stats.byMonth[monthYear]) {
+      stats.byMonth[monthYear] = { approved: 0, pending: 0, rejected: 0, totalDays: 0 };
+    }
+    if (leave.status === LEAVE_STATUS.APPROVED) {
+      stats.byMonth[monthYear].approved++;
+      stats.byMonth[monthYear].totalDays += leave.totalDays;
+    } else if (leave.status === LEAVE_STATUS.PENDING || leave.status === LEAVE_STATUS.PENDING_HR) {
+      stats.byMonth[monthYear].pending++;
+    } else if (leave.status === LEAVE_STATUS.REJECTED) {
+      stats.byMonth[monthYear].rejected++;
+    }
+  });
+
+  return stats;
+}
+
+async function getAnnualReport(userId, year) {
+  const startDate = new Date(year, 0, 1);
+  const endDate = new Date(year, 11, 31);
+
+  const [user, leaves, balances] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: userId },
+      include: { department: true },
+    }),
+    prisma.leave.findMany({
+      where: {
+        requesterId: userId,
+        startDate: { gte: startDate, lte: endDate },
+      },
+      include: { leaveType: true },
+      orderBy: { startDate: 'asc' },
+    }),
+    prisma.leaveBalance.findMany({
+      where: { userId, year },
+      include: { leaveType: true },
+    }),
+  ]);
+
+  if (!user) throw new ApiError(404, 'User not found');
+
+  const exportService = require('./exportService');
+  return exportService.generateAnnualReport({ leaves, balances, user, year });
+}
+
+async function getDepartmentAnalytics(departmentId, dateRange = {}) {
+  const { startDate, endDate } = dateRange;
+
+  const where = {
+    requester: { departmentId },
+  };
+
+  if (startDate || endDate) {
+    where.startDate = {};
+    if (startDate) where.startDate.gte = new Date(startDate);
+    if (endDate) where.startDate.lte = new Date(endDate);
+  } else {
+    // Default to last year
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+    where.startDate = { gte: oneYearAgo };
+  }
+
+  const [department, leaves] = await Promise.all([
+    prisma.department.findUnique({ where: { id: departmentId } }),
+    prisma.leave.findMany({
+      where,
+      include: {
+        requester: { select: { id: true, firstName: true, lastName: true } },
+        leaveType: true,
+      },
+      orderBy: { startDate: 'asc' },
+    }),
+  ]);
+
+  if (!department) throw new ApiError(404, 'Department not found');
+
+  const exportService = require('./exportService');
+  return exportService.generateDepartmentAnalytics({
+    department,
+    leaves,
+    dateRange: dateRange.startDate && dateRange.endDate
+      ? `${dateRange.startDate} to ${dateRange.endDate}`
+      : 'Last 12 months',
+  });
+}
+
 function sanitizeLeave(leave) {
   if (leave.requester) {
     const { passwordHash, ...safeRequester } = leave.requester;
     leave.requester = safeRequester;
+  }
+  if (leave.managerReviewer) {
+    const { passwordHash, ...safeReviewer } = leave.managerReviewer;
+    leave.managerReviewer = safeReviewer;
+  }
+  if (leave.hrReviewer) {
+    const { passwordHash, ...safeReviewer } = leave.hrReviewer;
+    leave.hrReviewer = safeReviewer;
   }
   return leave;
 }
@@ -387,4 +640,8 @@ module.exports = {
   cancelLeave,
   deleteLeave,
   getCalendarLeaves,
+  getUpcomingLeaves,
+  getLeaveStats,
+  getAnnualReport,
+  getDepartmentAnalytics,
 };
