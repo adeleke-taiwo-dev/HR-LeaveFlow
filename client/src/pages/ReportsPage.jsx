@@ -9,7 +9,7 @@ import DepartmentUtilization from '../components/charts/DepartmentUtilization';
 import LeavesTrendChart from '../components/charts/LeavesTrendChart';
 import toast from 'react-hot-toast';
 import './ReportsPage.css';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 
 export default function ReportsPage() {
   const { user } = useAuth();
