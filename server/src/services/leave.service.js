@@ -1,6 +1,6 @@
 const prisma = require('../config/database');
 const ApiError = require('../utils/apiError');
-const { calculateTotalDays } = require('../utils/dateUtils');
+const { calculateLeaveDays } = require('../utils/dateUtils');
 const { LEAVE_STATUS, ROLES } = require('../utils/constants');
 
 async function createLeave(userId, { leaveTypeId, startDate, endDate, reason }) {
@@ -16,7 +16,7 @@ async function createLeave(userId, { leaveTypeId, startDate, endDate, reason }) 
     throw new ApiError(404, 'Leave type not found or inactive');
   }
 
-  const totalDays = calculateTotalDays(start, end);
+  const totalDays = calculateLeaveDays(start, end, leaveType.name);
 
   // Check leave balance
   const currentYear = start.getFullYear();

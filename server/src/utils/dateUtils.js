@@ -22,4 +22,13 @@ function calculateTotalDays(startDate, endDate) {
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
 }
 
-module.exports = { calculateBusinessDays, calculateTotalDays };
+function calculateLeaveDays(startDate, endDate, leaveTypeName) {
+  // Maternity/Paternity leave includes weekends
+  if (leaveTypeName && leaveTypeName.toLowerCase().includes('maternity')) {
+    return calculateTotalDays(startDate, endDate);
+  }
+  // All other leave types exclude weekends
+  return calculateBusinessDays(startDate, endDate);
+}
+
+module.exports = { calculateBusinessDays, calculateTotalDays, calculateLeaveDays };
