@@ -15,6 +15,7 @@ import ProfilePage from './pages/ProfilePage';
 import AdminUsersPage from './pages/AdminUsersPage';
 import AdminDepartmentsPage from './pages/AdminDepartmentsPage';
 import AdminLeaveTypesPage from './pages/AdminLeaveTypesPage';
+import CalendarPage from './pages/CalendarPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -46,6 +47,7 @@ export default function App() {
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/leaves/my" element={<MyLeavesPage />} />
               <Route path="/leaves/new" element={<NewLeavePage />} />
+              <Route path="/leaves/calendar" element={<CalendarPage />} />
               <Route path="/balances" element={<LeaveBalancePage />} />
               <Route path="/profile" element={<ProfilePage />} />
 

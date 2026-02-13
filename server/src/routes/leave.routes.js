@@ -28,6 +28,7 @@ router.use(authenticate);
 
 router.post('/', validate(createLeaveSchema), leaveController.createLeave);
 router.get('/my', leaveController.getMyLeaves);
+router.get('/calendar', leaveController.getCalendarLeaves);
 router.get('/team', authorize('manager', 'admin'), leaveController.getTeamLeaves);
 router.get('/', authorize('admin'), leaveController.getAllLeaves);
 router.get('/:id', leaveController.getLeaveById);

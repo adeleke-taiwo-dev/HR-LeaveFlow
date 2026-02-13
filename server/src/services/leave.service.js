@@ -340,6 +340,35 @@ async function deleteLeave(leaveId) {
   });
 }
 
+async function getCalendarLeaves(user, { startDate, endDate, departmentId }) {
+  const where = {
+    status: LEAVE_STATUS.APPROVED,
+    OR: [
+      { startDate: { gte: new Date(startDate), lte: new Date(endDate) } },
+      { endDate: { gte: new Date(startDate), lte: new Date(endDate) } },
+      { AND: [{ startDate: { lte: new Date(startDate) } }, { endDate: { gte: new Date(endDate) } }] },
+    ],
+  };
+
+  // Manager sees only their department; admin sees all or filtered department
+  if (user.role === ROLES.MANAGER) {
+    where.requester = { departmentId: user.departmentId };
+  } else if (departmentId) {
+    where.requester = { departmentId };
+  }
+
+  const leaves = await prisma.leave.findMany({
+    where,
+    include: {
+      requester: { select: { id: true, firstName: true, lastName: true, department: true } },
+      leaveType: true,
+    },
+    orderBy: { startDate: 'asc' },
+  });
+
+  return leaves.map(sanitizeLeave);
+}
+
 function sanitizeLeave(leave) {
   if (leave.requester) {
     const { passwordHash, ...safeRequester } = leave.requester;
@@ -357,4 +386,5 @@ module.exports = {
   updateLeaveStatus,
   cancelLeave,
   deleteLeave,
+  getCalendarLeaves,
 };

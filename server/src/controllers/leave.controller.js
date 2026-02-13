@@ -79,6 +79,16 @@ const deleteLeave = catchAsync(async (req, res) => {
   });
 });
 
+const getCalendarLeaves = catchAsync(async (req, res) => {
+  const { startDate, endDate, departmentId } = req.query;
+  const leaves = await leaveService.getCalendarLeaves(req.user, {
+    startDate,
+    endDate,
+    departmentId,
+  });
+  res.json({ success: true, data: leaves });
+});
+
 module.exports = {
   createLeave,
   getMyLeaves,
@@ -88,4 +98,5 @@ module.exports = {
   updateLeaveStatus,
   cancelLeave,
   deleteLeave,
+  getCalendarLeaves,
 };
