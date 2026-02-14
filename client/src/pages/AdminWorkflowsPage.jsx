@@ -103,8 +103,8 @@ export default function AdminWorkflowsPage() {
     return <div className="loading">Loading workflows...</div>;
   }
 
-  const workflowList = Array.isArray(workflows?.data) ? workflows.data : [];
-  const leaveTypeList = Array.isArray(leaveTypes?.data) ? leaveTypes.data : [];
+  const workflowList = Array.isArray(workflows?.data?.data) ? workflows.data.data : [];
+  const leaveTypeList = Array.isArray(leaveTypes?.data?.data) ? leaveTypes.data.data : [];
   const existingLeaveTypeIds = workflowList.map((w) => w.leaveTypeId);
   const availableLeaveTypes = leaveTypeList.filter((lt) => !existingLeaveTypeIds.includes(lt.id));
 
